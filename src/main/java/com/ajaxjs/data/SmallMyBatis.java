@@ -1,6 +1,5 @@
 package com.ajaxjs.data;
 
-import com.ajaxjs.framework.spring.DiContextUtil;
 import com.ajaxjs.util.XmlHelper;
 import com.ajaxjs.util.io.Resources;
 import lombok.extern.slf4j.Slf4j;
@@ -251,8 +250,9 @@ public class SmallMyBatis {
      * @param sqlId     SQL ID
      * @return 处理后的 SQL 语句
      */
-    public static String handleSql(Map<String, Object> paramsMap, String sqlId) {
-        String sql = Objects.requireNonNull(DiContextUtil.getBean(SmallMyBatis.class)).getSqlById(sqlId); // 获取 SQL 语句
+    public String handleSql(Map<String, Object> paramsMap, String sqlId) {
+//        String sql = Objects.requireNonNull(DiContextUtil.getBean(SmallMyBatis.class)).getSqlById(sqlId); // 获取 SQL 语句
+        String sql = getSqlById(sqlId); // 获取 SQL 语句
 
         return handleSql(sql, paramsMap);// 处理 SQL 语句
     }

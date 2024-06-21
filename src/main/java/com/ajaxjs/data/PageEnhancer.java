@@ -2,7 +2,6 @@ package com.ajaxjs.data;
 
 import com.ajaxjs.data.jdbc_helper.JdbcReader;
 import com.ajaxjs.framework.PageResult;
-import com.ajaxjs.framework.spring.DiContextUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -11,6 +10,9 @@ import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.*;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -42,11 +44,31 @@ public class PageEnhancer {
     private static final String[] PAGE_NO = new String[]{"pageNo", "page"};
 
     /**
+     * 获取当前请求的 HttpServletRequest 对象
+     * 如果当前没有请求上下文，则根据是否正在运行测试来返回对应的请求对象
+     *
+     * @return 当前请求的 HttpServletRequest 对象，如果不存在请求上下文则返回 null
+     */
+    public static HttpServletRequest getRequest() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+
+//        if (requestAttributes == null) {
+//            if (TestHelper.isRunningTest())
+//                return WebHelper.request;
+//            else
+//                return null;
+//        }
+
+        assert requestAttributes != null;
+        return ((ServletRequestAttributes) requestAttributes).getRequest();
+    }
+
+    /**
      * 获取分页参数
      */
     public void getParams() {
         /* 判断分页参数，兼容 MySQL or 页面两者。最后统一使用 start/limit */
-        HttpServletRequest req = DiContextUtil.getRequest();
+        HttpServletRequest req = getRequest();
 
         if (req == null) {
             // 可能在测试
@@ -163,7 +185,7 @@ public class PageEnhancer {
                     plainSelect.setLimit(limitObj);
 
 //                    if (plainSelect.getFromItem() != null) {
-                        // modify the original table by adding an alias
+                    // modify the original table by adding an alias
 //						plainSelect.getFromItem().setAlias(new Table("original_table_alias"));
 //                    }
                 }

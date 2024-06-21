@@ -13,7 +13,7 @@ public interface JdbcConstants {
     Date NULL_DATE = new Date(0);
 
     /**
-     * 表示数据库里面的 null 值（ for String 类型）
+     * 表示数据库里面的 null 值（for String 类型）
      */
     String NULL_STRING = "__NULL_STRING__";
 
