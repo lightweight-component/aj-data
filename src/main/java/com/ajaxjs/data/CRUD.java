@@ -1,81 +1,17 @@
 package com.ajaxjs.data;
 
-import com.ajaxjs.data.jdbc_helper.JdbcConn;
-import com.ajaxjs.data.jdbc_helper.JdbcReader;
 import com.ajaxjs.data.jdbc_helper.JdbcWriter;
 import com.ajaxjs.data.jdbc_helper.common.IdField;
 import com.ajaxjs.data.jdbc_helper.common.TableName;
 import com.ajaxjs.framework.PageResult;
-import com.ajaxjs.framework.spring.DiContextUtil;
-import com.ajaxjs.util.ListUtils;
 import com.ajaxjs.util.reflect.Methods;
-import lombok.Data;
-import lombok.experimental.Accessors;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-@Data
-@Accessors(chain = true)
-public class CRUD<T> {
-    /**
-     * 创建一个JdbcReader对象并返回
-     *
-     * @return JdbcReader对象
-     */
-    public static JdbcReader jdbcReaderFactory() {
-        JdbcReader reader = new JdbcReader();
-        reader.setConn(JdbcConn.getConnection());
-
-        return reader;
-    }
-
-    /**
-     * 创建一个 JdbcWriter 实例并配置相关参数
-     * JdbcWriter 类有很多前期的全局配置，一般在注入阶段进行配置获取 JdbcWriter 类的实例，并设置连接池
-     *
-     * @return 配置好的 JdbcWriter 实例
-     */
-    public static JdbcWriter jdbcWriterFactory() {
-        //  JdbcWriter 有较多前期的全局配置，故一般在注入阶段配置好
-        JdbcWriter writer = DiContextUtil.getBean(JdbcWriter.class);
-        assert writer != null;
-        writer.setConn(JdbcConn.getConnection());
-
-        return writer;
-    }
-
-    private JdbcReader reader = jdbcReaderFactory();
-
-    /**
-     * SQL XML 里的 id
-     */
-    private String sqlId;
-
-    /**
-     * SQL 语句
-     */
-    private String sql;
-
-    private Map<String, Object> mapParams;
-
-    private Class<T> beanClz;
-
-    private Object[] orderedParams;
-
-    /**
-     * 获取 SQL 语句，如果是 SQL Id 则获取并解析之
-     *
-     * @return 最终 SQL 语句
-     */
-    private String getRealSql() {
-        if (StringUtils.hasText(sql)) return sql;
-        else if (StringUtils.hasText(sqlId)) return SmallMyBatis.handleSql(mapParams, sqlId);
-        else throw new IllegalArgumentException("没输入的 SQL 参数");
-    }
-
+public class CRUD {
     /**
      * 查询单行单列的记录
      *
@@ -86,34 +22,7 @@ public class CRUD<T> {
      * @return 单行单列记录
      */
     public static <T> T queryOne(Class<T> clz, String sql, Object... params) {
-        return jdbcReaderFactory().queryOne(sql, clz, params);
-    }
-
-    /**
-     * 获取单笔详情
-     *
-     * @return 可能是 Map 或者 Java Bean，根据 beanClz 是否有值来决定
-     */
-    public Object info() {
-        String sql = getRealSql();
-
-        return beanClz == null ? reader.queryAsMap(sql, orderedParams) : reader.queryAsBean(beanClz, sql, orderedParams);
-    }
-
-    @SuppressWarnings("unchecked")
-    public T infoBean() {
-        Object info = info();
-        if (info == null) return null;
-
-        return (T) info;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> infoMap() {
-        Object info = info();
-        if (info == null) return null;
-
-        return (Map<String, Object>) info;
+        return new CRUD_Service<T>().getReader().queryOne(sql, clz, params);
     }
 
     /**
@@ -126,7 +35,7 @@ public class CRUD<T> {
      * @return 查询单笔记录，以 Java Bea 格式返回
      */
     public static <T> T info(Class<T> beanClz, String sql, Object... params) {
-        return new CRUD<T>().setBeanClz(beanClz).setSql(sql).setOrderedParams(params).infoBean();
+        return new CRUD_Service<T>().setBeanClz(beanClz).setSql(sql).setOrderedParams(params).infoBean();
     }
 
     /**
@@ -140,7 +49,7 @@ public class CRUD<T> {
      * @return 查询单笔记录，以 Java Bea 格式返回
      */
     public static <T> T infoBySqlId(Class<T> beanClz, String sqlId, Map<String, Object> mapParams, Object... params) {
-        return new CRUD<T>().setBeanClz(beanClz).setSqlId(sqlId).setMapParams(mapParams).setOrderedParams(params).infoBean();
+        return new CRUD_Service<T>().setBeanClz(beanClz).setSqlId(sqlId).setMapParams(mapParams).setOrderedParams(params).infoBean();
     }
 
     /**
@@ -151,7 +60,7 @@ public class CRUD<T> {
      * @return 查询结果，如果为 null 表示没数据
      */
     public static Map<String, Object> infoMap(String sql, Object... params) {
-        return new CRUD<>().setSql(sql).setOrderedParams(params).infoMap();
+        return new CRUD_Service<>().setSql(sql).setOrderedParams(params).infoMap();
     }
 
     /**
@@ -163,27 +72,7 @@ public class CRUD<T> {
      * @return 查询结果，如果为 null 表示没数据
      */
     public static Map<String, Object> infoMapBySqlId(String sqlId, Map<String, Object> mapParams, Object... params) {
-        return new CRUD<>().setSqlId(sqlId).setMapParams(mapParams).setOrderedParams(params).infoMap();
-    }
-
-    public List<?> list() {
-        String sql = getRealSql();
-
-        return beanClz == null ? reader.queryAsMapList(sql, orderedParams) : reader.queryAsBeanList(beanClz, sql, orderedParams);
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<T> listBean() {
-        List<T> list = (List<T>) list();
-
-        return ListUtils.getList(list);
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> listMap() {
-        List<Map<String, Object>> list = (List<Map<String, Object>>) list();
-
-        return ListUtils.getList(list);
+        return new CRUD_Service<>().setSqlId(sqlId).setMapParams(mapParams).setOrderedParams(params).infoMap();
     }
 
     /**
@@ -194,7 +83,7 @@ public class CRUD<T> {
      * @return 查询结果，如果没数据返回一个空 List
      */
     public static List<Map<String, Object>> listMap(String sql, Object... params) {
-        return new CRUD<>().setSql(sql).setOrderedParams(params).listMap();
+        return new CRUD_Service<>().setSql(sql).setOrderedParams(params).listMap();
     }
 
     /**
@@ -206,7 +95,7 @@ public class CRUD<T> {
      * @return 查询结果，如果没数据返回一个空 List
      */
     public static List<Map<String, Object>> listMapBySqlId(String sqlId, Map<String, Object> paramsMap, Object... params) {
-        return new CRUD<>().setSqlId(sqlId).setMapParams(paramsMap).setOrderedParams(params).listMap();
+        return new CRUD_Service<>().setSqlId(sqlId).setMapParams(paramsMap).setOrderedParams(params).listMap();
     }
 
     /**
@@ -218,7 +107,7 @@ public class CRUD<T> {
      * @return 查询结果，如果没数据返回一个空 List
      */
     public static <T> List<T> list(Class<T> beanClz, String sql, Object... params) {
-        return new CRUD<T>().setBeanClz(beanClz).setSql(sql).setOrderedParams(params).listBean();
+        return new CRUD_Service<T>().setBeanClz(beanClz).setSql(sql).setOrderedParams(params).listBean();
     }
 
     /**
@@ -232,8 +121,7 @@ public class CRUD<T> {
      * @return 查询结果，如果没数据返回一个空 List
      */
     public static <T> List<T> listBySqlId(Class<T> beanClz, String sqlId, Map<String, Object> paramsMap, Object... params) {
-//        LOGGER.warning(new Exception("ffifi0"));
-        return new CRUD<T>().setBeanClz(beanClz).setSqlId(sqlId).setMapParams(paramsMap).setOrderedParams(params).listBean();
+        return new CRUD_Service<T>().setBeanClz(beanClz).setSqlId(sqlId).setMapParams(paramsMap).setOrderedParams(params).listBean();
     }
 
     /**

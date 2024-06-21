@@ -53,8 +53,10 @@ public class JdbcConn {
     public Connection getConnection(String jdbcUrl, String userName, String password) {
         try {
 
-            if (StringUtils.hasText(userName) && StringUtils.hasText(password)) conn = DriverManager.getConnection(jdbcUrl, userName, password);
-            else conn = DriverManager.getConnection(jdbcUrl);
+            if (StringUtils.hasText(userName) && StringUtils.hasText(password))
+                conn = DriverManager.getConnection(jdbcUrl, userName, password);
+            else
+                conn = DriverManager.getConnection(jdbcUrl);
 
             log.info("数据库连接成功： " + conn.getMetaData().getURL());
         } catch (SQLException e) {
@@ -198,6 +200,12 @@ public class JdbcConn {
         return ds;
     }
 
+    private final static String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
+
+    public static DataSource setupMysqlJdbcPool(String url, String user, String psw) {
+        return setupJdbcPool(MYSQL_DRIVER, url, user, psw);
+    }
+
     /**
      * 一般来说 Tomcat 会自动注册但是我们现在手动使用 Pool，于是也得手动地注册到 MBean
      */
@@ -212,7 +220,7 @@ public class JdbcConn {
     }
 
     /**
-     * 对 PS 设置值
+     * 对 PreparedStatement 设置值
      *
      * @param ps     PreparedStatement
      * @param params 插入到 SQL 中的参数，可单个可多个可不填

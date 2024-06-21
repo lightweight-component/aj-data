@@ -85,13 +85,14 @@ public class SmallMyBatis {
     public String getSqlById(String id) {
         String sql = sqls.get(id);
 
-        if (!StringUtils.hasText(sql)) throw new IllegalArgumentException("查询 id 为 " + id + "　的 SQL 为空");
+        if (!StringUtils.hasText(sql))
+            throw new IllegalArgumentException("查询 id 为 " + id + "　的 SQL 为空");
 
         return sql;
     }
 
     /**
-     * 类似 Mybatis 替换动态 sql 的方法，要求支持 <if> 标签
+     * 类似 Mybatis 替换动态 sql 的方法，要求支持 if 标签
      *
      * @param sqlTemplate SQL 语句
      * @param params      SQL 插值参数集合
@@ -153,7 +154,6 @@ public class SmallMyBatis {
         return BOL_EXP_PARSER.get(test, params);
     }
 
-
     /**
      * 解析 SQL 中的 forEach 语句
      *
@@ -191,7 +191,6 @@ public class SmallMyBatis {
 
         return result.toString();
     }
-
 
     /**
      * 匹配占位符的正则表达式
@@ -251,12 +250,12 @@ public class SmallMyBatis {
      * @return 处理后的 SQL 语句
      */
     public String handleSql(Map<String, Object> paramsMap, String sqlId) {
-//        String sql = Objects.requireNonNull(DiContextUtil.getBean(SmallMyBatis.class)).getSqlById(sqlId); // 获取 SQL 语句
-        String sql = getSqlById(sqlId); // 获取 SQL 语句
-
-        return handleSql(sql, paramsMap);// 处理 SQL 语句
+        return handleSql(getSqlById(sqlId), paramsMap);// 处理 SQL 语句
     }
 
+    /**
+     * Dummy
+     */
     private static final Map<String, Object> EMPTY_PARAMS_MAP = new HashMap<>();
 
     /**
@@ -266,8 +265,9 @@ public class SmallMyBatis {
      * @param paramsMap 参数映射关系
      * @return 处理后的 SQL 语句
      */
-    public static String handleSql(String sql, Map<String, Object> paramsMap) {
-        if (paramsMap == null) paramsMap = EMPTY_PARAMS_MAP;
+    public String handleSql(String sql, Map<String, Object> paramsMap) {
+        if (paramsMap == null)
+            paramsMap = EMPTY_PARAMS_MAP;
 
         sql = generateIfBlock(sql, paramsMap);
         //        sql = parseForEach(sql, paramsMap);
