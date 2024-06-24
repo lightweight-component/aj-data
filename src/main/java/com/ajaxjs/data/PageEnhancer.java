@@ -9,9 +9,6 @@ import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.*;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -42,35 +39,15 @@ public class PageEnhancer {
 
     private static final String[] PAGE_NO = new String[]{"pageNo", "page"};
 
-    /**
-     * 获取当前请求的 HttpServletRequest 对象
-     * 如果当前没有请求上下文，则根据是否正在运行测试来返回对应的请求对象
-     *
-     * @return 当前请求的 HttpServletRequest 对象，如果不存在请求上下文则返回 null
-     */
-    public static HttpServletRequest getRequest() {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-
-//        if (requestAttributes == null) {
-//            if (TestHelper.isRunningTest())
-//                return WebHelper.request;
-//            else
-//                return null;
-//        }
-
-        assert requestAttributes != null;
-        return ((ServletRequestAttributes) requestAttributes).getRequest();
-    }
+    private JdbcReader jdbcReader;
 
     /**
      * 获取分页参数
+     *
+     * @param req 判断分页参数，兼容 MySQL or 页面两者。最后统一使用 start/limit
      */
-    public void getParams() {
-        /* 判断分页参数，兼容 MySQL or 页面两者。最后统一使用 start/limit */
-        HttpServletRequest req = getRequest();
-
-        if (req == null) {
-            // 可能在测试
+    public void getParams(HttpServletRequest req) {
+        if (req == null) {// 可能在测试
             start = 0;
             limit = PageResult.DEFAULT_PAGE_SIZE;
 
@@ -111,8 +88,8 @@ public class PageEnhancer {
      * @param sql SQL语句
      * @return 初始化后的分页器
      */
-    public PageEnhancer initSql(String sql) {
-        getParams();
+    public PageEnhancer initSql(String sql, HttpServletRequest req) {
+        getParams(req);
 
         return initSql(sql, start, limit);
     }
@@ -205,7 +182,6 @@ public class PageEnhancer {
     @SuppressWarnings("unchecked")
     public <T> PageResult<T> page(Class<T> beanCls) {
         PageResult<T> result = new PageResult<>();
-        JdbcReader jdbcReader = CRUD.jdbcReaderFactory();
         Long total = jdbcReader.queryOne(countTotal, Long.class);
 
         if (total != null && total > 0) {
@@ -228,21 +204,6 @@ public class PageEnhancer {
         result.setZero(true);
 
         return result;
-    }
-
-    /**
-     * 分页方法
-     *
-     * @param sql     数据库查询语句
-     * @param beanClz 分页结果对应的实体类
-     * @param <T>     实体类类型
-     * @return 分页结果
-     */
-    public static <T> PageResult<T> page(String sql, Class<T> beanClz) {
-        PageEnhancer p = new PageEnhancer();
-        p.initSql(sql);
-
-        return p.page(beanClz);
     }
 
     /**

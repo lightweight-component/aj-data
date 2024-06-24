@@ -1,4 +1,4 @@
-package com.ajaxjs.data;
+package com.ajaxjs.data.util;
 
 import com.ajaxjs.data.util.SqlInjectionAnalyzer;
 import org.junit.Test;

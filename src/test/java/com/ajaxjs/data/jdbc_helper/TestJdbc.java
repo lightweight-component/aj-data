@@ -1,6 +1,5 @@
-package com.ajaxjs.data;
+package com.ajaxjs.data.jdbc_helper;
 
-import com.ajaxjs.data.jdbc_helper.JdbcWriter;
 import com.ajaxjs.util.TestHelper;
 import org.junit.Assert;
 import org.junit.Test;

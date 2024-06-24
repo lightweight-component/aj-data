@@ -1,4 +1,4 @@
-package com.ajaxjs.data;
+package com.ajaxjs.data.jdbc_helper;
 
 import org.junit.Test;
 

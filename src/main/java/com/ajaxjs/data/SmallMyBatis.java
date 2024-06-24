@@ -265,7 +265,7 @@ public class SmallMyBatis {
      * @param paramsMap 参数映射关系
      * @return 处理后的 SQL 语句
      */
-    public String handleSql(String sql, Map<String, Object> paramsMap) {
+    public static String handleSql(String sql, Map<String, Object> paramsMap) {
         if (paramsMap == null)
             paramsMap = EMPTY_PARAMS_MAP;
 

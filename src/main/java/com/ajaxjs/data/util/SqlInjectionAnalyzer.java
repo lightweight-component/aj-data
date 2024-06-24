@@ -31,7 +31,6 @@ public class SqlInjectionAnalyzer extends TablesNamesFinder {
 //            return true;
 //        }
 //    };
-
     private final ConstAnalyzer constAnalyzer = new ConstAnalyzer();
 
     public SqlInjectionAnalyzer() {

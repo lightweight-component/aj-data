@@ -1,6 +1,6 @@
 package com.ajaxjs.data.jdbc_helper;
 
-import com.ajaxjs.data.CRUD;
+import com.ajaxjs.data.CRUD_Service;
 import com.ajaxjs.data.DataAccessException;
 import com.ajaxjs.data.DataUtils;
 import com.ajaxjs.data.jdbc_helper.common.TableName;
@@ -504,7 +504,7 @@ public class JdbcWriter extends JdbcConn implements JdbcConstants {
             throw new IllegalArgumentException("不支持参数");
 
         Object firstEntity = arr[0];
-        sb.append("INSERT INTO ").append(CRUD.getTableName(firstEntity)).append(" (");
+        sb.append("INSERT INTO ").append(CRUD_Service.getTableName(firstEntity)).append(" (");
         everyBeanField(firstEntity, (field, value) -> sb.append(" `").append(field).append("`,"));
         sb.deleteCharAt(sb.length() - 1);// 删除最后一个
         sb.append(") VALUES");

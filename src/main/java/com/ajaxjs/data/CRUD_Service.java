@@ -2,6 +2,8 @@ package com.ajaxjs.data;
 
 import com.ajaxjs.data.jdbc_helper.JdbcReader;
 import com.ajaxjs.data.jdbc_helper.JdbcWriter;
+import com.ajaxjs.data.jdbc_helper.common.IdField;
+import com.ajaxjs.data.jdbc_helper.common.TableName;
 import com.ajaxjs.util.ListUtils;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -13,33 +15,6 @@ import java.util.Map;
 @Data
 @Accessors(chain = true)
 public class CRUD_Service<T> {
-//    /**
-//     * 创建一个 JdbcReader 对象并返回
-//     *
-//     * @return JdbcReader对象
-//     */
-//    public static JdbcReader jdbcReaderFactory() {
-//        JdbcReader reader = new JdbcReader();
-//        reader.setConn(JdbcConn.getConnection());
-//
-//        return reader;
-//    }
-//
-//    /**
-//     * 创建一个 JdbcWriter 实例并配置相关参数
-//     * JdbcWriter 类有很多前期的全局配置，一般在注入阶段进行配置获取 JdbcWriter 类的实例，并设置连接池
-//     *
-//     * @return 配置好的 JdbcWriter 实例
-//     */
-//    public static JdbcWriter jdbcWriterFactory() {
-//        //  JdbcWriter 有较多前期的全局配置，故一般在注入阶段配置好
-//        JdbcWriter writer = DiContextUtil.getBean(JdbcWriter.class);
-//        assert writer != null;
-//        writer.setConn(JdbcConn.getConnection());
-//
-//        return writer;
-//    }
-
     private JdbcReader reader;
 
     private JdbcWriter writer;
@@ -159,4 +134,30 @@ public class CRUD_Service<T> {
         return ListUtils.getList(list);
     }
 
+    /**
+     * 获取实体类上的表名（通过注解）
+     *
+     * @param entity 实体类
+     * @return 表名
+     */
+    public static String getTableName(Object entity) {
+        TableName tableNameA = entity.getClass().getAnnotation(TableName.class);
+        if (tableNameA == null) throw new RuntimeException("实体类未提供表名");
+
+        return tableNameA.value();
+    }
+
+    /**
+     * 获取实体类上的 Id 字段名称（通过注解）
+     *
+     * @param entity 实体类
+     * @return 表名
+     */
+    public static String getIdField(Object entity) {
+        IdField annotation = entity.getClass().getAnnotation(IdField.class);
+
+        if (annotation == null) throw new DataAccessException("没设置 IdField 注解，不知哪个主键字段");
+
+        return annotation.value();
+    }
 }
