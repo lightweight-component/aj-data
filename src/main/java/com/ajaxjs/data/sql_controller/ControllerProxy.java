@@ -3,7 +3,7 @@ package com.ajaxjs.data.sql_controller;
 import com.ajaxjs.data.CRUD;;
 import com.ajaxjs.data.DataAccessException;
 import com.ajaxjs.framework.IBaseModel;
-import com.ajaxjs.framework.PageResult;
+import com.ajaxjs.data.PageResult;
 import com.ajaxjs.util.reflect.Clazz;
 import com.ajaxjs.util.reflect.Methods;
 import com.ajaxjs.util.reflect.Types;

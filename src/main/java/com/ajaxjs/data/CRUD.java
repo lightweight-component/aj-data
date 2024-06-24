@@ -3,7 +3,6 @@ package com.ajaxjs.data;
 import com.ajaxjs.data.jdbc_helper.JdbcWriter;
 import com.ajaxjs.data.jdbc_helper.common.IdField;
 import com.ajaxjs.data.jdbc_helper.common.TableName;
-import com.ajaxjs.framework.PageResult;
 import com.ajaxjs.util.reflect.Methods;
 import org.springframework.util.StringUtils;
 
