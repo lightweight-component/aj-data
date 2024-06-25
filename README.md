@@ -10,6 +10,8 @@ Tutorial: https://framework.ajaxjs.com/docs/aj/.
 
 Java Documents: https://dev.ajaxjs.com/docs/javadoc/aj-data/.
 
+DataService for rapidly CRUD
+
 # Install
 Requires Java 1.8+, Maven Snippets:
 
