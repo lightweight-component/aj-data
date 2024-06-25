@@ -24,3 +24,10 @@ Requires Java 1.8+, Maven Snippets:
 
 ```java
 ```
+
+# 鸣谢
+
+本人水平有限，该项目中引用了下面的源码。
+
+- 使用了 Twitter 的分布式自增 ID 算法 Snowflake：雪花生成器。
+- 数据层参考了开源项目：[memory](https://gitee.com/bitprince/memory)
