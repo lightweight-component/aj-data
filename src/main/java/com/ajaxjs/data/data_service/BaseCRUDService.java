@@ -32,7 +32,7 @@ public abstract class BaseCRUDService implements DataServiceController {
 
     @Override
     public Map<String, Object> info(String namespace, Long id) {
-        return getCRUD(namespace, crud -> dao.infoMap(crud.getSql()), crud -> dao.infoMap(id));
+        return getCRUD(namespace, crud -> dao.infoMap(crud.getSql()), crud -> crud.infoMap(id));
     }
 
     @Override
@@ -44,13 +44,13 @@ public abstract class BaseCRUDService implements DataServiceController {
 
     @Override
     public List<Map<String, Object>> list(String namespace) {
-        return getCRUD(namespace, crud -> dao.listMap(crud.getSql()), dao::listMap);
+        return getCRUD(namespace, crud -> dao.listMap(crud.getSql()), crud->);
     }
 
     /**
-     * 根据命名空间获取特定的BaseCRUD实例。
-     * 这个方法用于通过两个命名空间标识来获取一个特定的BaseCRUD实例，首先从一个全局映射中根据第一个命名空间获取一个BaseCRUD实例，
-     * 然后从这个实例的子实例映射中根据第二个命名空间获取具体的BaseCRUD实例。
+     * 根据命名空间获取特定的 BaseCRUD 实例。
+     * 这个方法用于通过两个命名空间标识来获取一个特定的 BaseCRUD 实例，首先从一个全局映射中根据第一个命名空间获取一个BaseCRUD实例，
+     * 然后从这个实例的子实例映射中根据第二个命名空间获取具体的 BaseCRUD 实例。
      *
      * @param namespace  第一个命名空间标识，用于查找到对应的BaseCRUD实例。
      * @param namespace2 第二个命名空间标识，用于从第一个命名空间的子实例中找到对应的 BaseCRUD 实例。
@@ -74,7 +74,7 @@ public abstract class BaseCRUDService implements DataServiceController {
     public List<Map<String, Object>> list(String namespace, String namespace2) {
         BaseCRUD<?, Long> crud = getCrudChild(namespace, namespace2);
 
-        return isSingle(crud) ? CRUD.listMap(crud.getSql()) : crud.listMap();
+        return isSingle(crud) ? dao.listMap(crud.getSql()) : crud.listMap();
     }
 
     public interface CMD_TYPE {
@@ -94,7 +94,7 @@ public abstract class BaseCRUDService implements DataServiceController {
 
         return (PageResult<Map<String, Object>>) getCRUD(namespace, crud -> {
             // TODO, handle WHERE
-            return CRUD.page(null, crud.getSql(), null);
+            return dao.page(null, crud.getSql(), null);
         }, crud -> crud.page(where));
     }
 
@@ -130,6 +130,7 @@ public abstract class BaseCRUDService implements DataServiceController {
 
         return getCRUD(namespace, crud -> {
             String sql = SmallMyBatis.handleSql(crud.getSql(), _params);
+
             return jdbcWriter.write(sql) > 0;
         }, crud -> crud.update(_params));
     }
@@ -289,11 +290,10 @@ public abstract class BaseCRUDService implements DataServiceController {
 
     /**
      * 从数据库中加载配置。
-     * 此方法首先初始化数据库连接，然后清除现有的配置命名空间。接着，它从数据库中查询所有状态不为1的配置项，并进行处理：
+     * 此方法首先清除现有的配置命名空间。接着，它从数据库中查询所有状态不为1的配置项，并进行处理：
      * - 对查询结果进行排序（按照 pid，以 pid 为-1的项首先排列）；
      * - 遍历排序后的结果，为每个配置项创建一个 CRUD 对象，并根据配置项的 pid 来建立父子关系；
      * - 最后，将所有的配置项按照其所属的命名空间保存到 namespaces 中。
-     * 在整个过程完成后，会关闭数据库连接。
      */
     public void loadConfigFromDatabase() {
         namespaces.clear();
