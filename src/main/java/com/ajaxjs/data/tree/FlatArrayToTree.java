@@ -1,4 +1,4 @@
-package com.ajaxjs.data.entity.tree;
+package com.ajaxjs.data.tree;
 
 import java.io.Serializable;
 import java.util.ArrayList;

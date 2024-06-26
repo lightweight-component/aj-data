@@ -1,4 +1,4 @@
-package com.ajaxjs.data.entity.tree;
+package com.ajaxjs.data.tree;
 
 /**
  * 一个树节点

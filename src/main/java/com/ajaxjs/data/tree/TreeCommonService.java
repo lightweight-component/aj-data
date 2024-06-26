@@ -1,4 +1,4 @@
-package com.ajaxjs.data.entity.tree;
+package com.ajaxjs.data.tree;
 
 import java.util.HashSet;
 import java.util.List;
