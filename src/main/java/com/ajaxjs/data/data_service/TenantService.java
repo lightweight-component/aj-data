@@ -49,11 +49,11 @@ public class TenantService {
 
             return tenantId;
         } else
-            return BaseCRUD.getCurrentUserTenantId();// 从用户获取，一般在后台操作时候会这样。也有可能最终找不到，为 null
+            return DataServiceUtils.getCurrentUserTenantId();// 从用户获取，一般在后台操作时候会这样。也有可能最终找不到，为 null
     }
 
     private static void checkUserPrivilegeOfTenant(HttpServletRequest request, Integer tenantId) {
-        Integer userTenantId = BaseCRUD.getCurrentUserTenantId();
+        Integer userTenantId = DataServiceUtils.getCurrentUserTenantId();
 
         if (userTenantId == null || userTenantId == 0) // 没设租户 id，则是管理员，可访问所有租户
             return;

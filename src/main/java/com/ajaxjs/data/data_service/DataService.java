@@ -20,15 +20,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- *
+ * 数据服务
  */
 @Slf4j
-public abstract class BaseCRUDService implements DataServiceController {
+public abstract class DataService implements DataServiceController {
     private JdbcWriter jdbcWriter;
 
     private DataAccessObject dao;
 
-    public final Map<String, BaseCRUD<?, Long>> namespaces = new HashMap<>();
+    public final Map<String, FastCRUD<?, Long>> namespaces = new HashMap<>();
 
     @Override
     public Map<String, Object> info(String namespace, Long id) {
@@ -37,19 +37,19 @@ public abstract class BaseCRUDService implements DataServiceController {
 
     @Override
     public Map<String, Object> info(String namespace, String namespace2, Long id) {
-        BaseCRUD<?, Long> crud = getCrudChild(namespace, namespace2);
+        FastCRUD<?, Long> crud = getCrudChild(namespace, namespace2);
 
         return isSingle(crud) ? dao.infoMap(crud.getSql()) : crud.infoMap(id);
     }
 
     @Override
     public List<Map<String, Object>> list(String namespace) {
-        return getCRUD(namespace, crud -> dao.listMap(crud.getSql()), crud->);
+        return getCRUD(namespace, crud -> dao.listMap(crud.getSql()), FastCRUD::listMap);
     }
 
     /**
      * 根据命名空间获取特定的 BaseCRUD 实例。
-     * 这个方法用于通过两个命名空间标识来获取一个特定的 BaseCRUD 实例，首先从一个全局映射中根据第一个命名空间获取一个BaseCRUD实例，
+     * 这个方法用于通过两个命名空间标识来获取一个特定的 BaseCRUD 实例，首先从一个全局映射中根据第一个命名空间获取一个 BaseCRUD 实例，
      * 然后从这个实例的子实例映射中根据第二个命名空间获取具体的 BaseCRUD 实例。
      *
      * @param namespace  第一个命名空间标识，用于查找到对应的BaseCRUD实例。
@@ -57,12 +57,12 @@ public abstract class BaseCRUDService implements DataServiceController {
      * @return 返回根据两个命名空间标识找到的 BaseCRUD 实例
      * @throws IllegalStateException 如果第一个命名空间不存在于映射中，或者第二个命名空间不存在于第一个命名空间的子实例映射中，抛出此异常。
      */
-    private BaseCRUD<?, Long> getCrudChild(String namespace, String namespace2) {
+    private FastCRUD<?, Long> getCrudChild(String namespace, String namespace2) {
         if (!namespaces.containsKey(namespace)) // 检查第一个命名空间是否配置了 BaseCRUD，如果没有配置则抛出异常
             throw new IllegalStateException("命名空间 " + namespace + " 没有配置 BaseCRUD");
 
-        BaseCRUD<?, Long> parentCrud = namespaces.get(namespace); // 通过第一个命名空间获取 BaseCRUD 实例
-        BaseCRUD<?, Long> crud = parentCrud.getChildren().get(namespace2);     // 通过第二个命名空间从父实例的子实例映射中获取特定的 BaseCRUD 实例
+        FastCRUD<?, Long> parentCrud = namespaces.get(namespace); // 通过第一个命名空间获取 BaseCRUD 实例
+        FastCRUD<?, Long> crud = parentCrud.getChildren().get(namespace2);     // 通过第二个命名空间从父实例的子实例映射中获取特定的 BaseCRUD 实例
 
         if (crud == null) // 检查第二个命名空间是否配置了 BaseCRUD，如果没有配置则抛出异常
             throw new IllegalStateException("命名空间 " + namespace2 + " 没有配置 BaseCRUD");
@@ -72,7 +72,7 @@ public abstract class BaseCRUDService implements DataServiceController {
 
     @Override
     public List<Map<String, Object>> list(String namespace, String namespace2) {
-        BaseCRUD<?, Long> crud = getCrudChild(namespace, namespace2);
+        FastCRUD<?, Long> crud = getCrudChild(namespace, namespace2);
 
         return isSingle(crud) ? dao.listMap(crud.getSql()) : crud.listMap();
     }
@@ -83,7 +83,7 @@ public abstract class BaseCRUDService implements DataServiceController {
         String CRUD = "CRUD";
     }
 
-    private static boolean isSingle(BaseCRUD<?, Long> crud) {
+    private static boolean isSingle(FastCRUD<?, Long> crud) {
         return CMD_TYPE.SINGLE.equals(crud.getType());
     }
 
@@ -145,15 +145,15 @@ public abstract class BaseCRUDService implements DataServiceController {
      *
      * @param namespace 命名空间
      * @param singleCMD 单个命令操作的函数
-     * @param crudCMD   CRUD 操作的函数
+     * @param crudCMD   FastCRUD 操作的函数
      * @param <R>       返回值类型
      * @return 执行结果
      */
-    private <R> R getCRUD(String namespace, Function<BaseCRUD<?, Long>, R> singleCMD, Function<BaseCRUD<?, Long>, R> crudCMD) {
+    private <R> R getCRUD(String namespace, Function<FastCRUD<?, Long>, R> singleCMD, Function<FastCRUD<?, Long>, R> crudCMD) {
         if (!namespaces.containsKey(namespace))
             throw new IllegalStateException("命名空间 " + namespace + " 没有配置 BaseCRUD");
 
-        BaseCRUD<?, Long> crud = namespaces.get(namespace);
+        FastCRUD<?, Long> crud = namespaces.get(namespace);
 
         return isSingle(crud) ? singleCMD.apply(crud) : crudCMD.apply(crud);
     }
@@ -300,11 +300,11 @@ public abstract class BaseCRUDService implements DataServiceController {
 
         List<ConfigPO> list = dao.list(ConfigPO.class, "SELECT * FROM ds_common_api WHERE stat != 1");// 从数据库中查询所有状态不为1的配置项
         list.sort(Comparator.comparingInt(ConfigPO::getPid)); // 根据pid对配置项进行排序
-        Map<Integer, BaseCRUD<Map<String, Object>, Long>> configMap = new HashMap<>();
+        Map<Integer, FastCRUD<Map<String, Object>, Long>> configMap = new HashMap<>();
 
         if (!CollectionUtils.isEmpty(list)) {
             for (ConfigPO config : list) {
-                BaseCRUD<Map<String, Object>, Long> crud = new BaseCRUD<>(); // 为每个配置项创建CRUD对象，并复制配置项的属性到CRUD对象中
+                FastCRUD<Map<String, Object>, Long> crud = new FastCRUD<>(); // 为每个配置项创建CRUD对象，并复制配置项的属性到CRUD对象中
                 BeanUtils.copyProperties(config, crud);
 
                 if (beforeCreate != null)  // 如果存在 beforeCreate 回调，则设置到 CRUD 对象中
@@ -323,7 +323,7 @@ public abstract class BaseCRUDService implements DataServiceController {
                     configMap.put(crud.getId(), crud);
                     crud.setChildren(new HashMap<>());
                 } else {
-                    BaseCRUD<Map<String, Object>, Long> _crud = configMap.get(crud.getPid()); // 查找并添加父级配置项的子配置项
+                    FastCRUD<Map<String, Object>, Long> _crud = configMap.get(crud.getPid()); // 查找并添加父级配置项的子配置项
 
                     if (_crud == null)
                         throw new IllegalStateException("程序错误：没有找到父级");
