@@ -16,15 +16,15 @@ AJ-Data boosts the CRUD development, not just an ORM library. There's three laye
 
 The style of API is based on CRUD(Create, Read, Update, Delete), For greater precision, let's delineate the topic into the following specific aspects:
 
-- to get a value, int or other numbers, or string, boolean, etc.
-- to get a detail(info), a Map or a Java Bean, return as JSON Object
-- to get list, might be a list of Map or a list of Java Bean, return as JSON Array
-- to get paging list, with the field 'total'
-- to create a record, return the ID of the record
-- to update a record, return the boolean value that the record is updated
-- to delete a record, return the boolean value that the record is deleted
-- batch update
-- any custom SQL
+- Single Value Retrieval: to get a value, int or other numbers, or string, boolean, etc.
+- Detail Retrieval: to get a detail(info), a Map or a Java Bean, return as JSON Object
+- List Retrieval: to get list, might be a list of Map or a list of Java Bean, return as JSON Array
+- Paged List Retrieval: to get paging list, with the field 'total' for the count
+- Record Creation: to create a record, return the ID of the record
+- Record Update: to update a record, return the boolean value that the record is updated
+- Record Deletion: to delete a record, return the boolean value that the record is deleted
+- Batch Updates: Performing multiple update operations in a single batch process
+- Custom SQL Execution: Executing custom SQL queries, complemented by Java code to ensure the completion of complex business logic
 
 We support two primary data formats for both input and output parameters:
 
