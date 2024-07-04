@@ -12,7 +12,14 @@ import java.util.Objects;
 public class FastCRUD_Service implements FastCRUD_Controller {
     public final Map<String, FastCRUD<Map<String, Object>, Long>> namespaces = new HashMap<>();
 
+    public boolean isInit;
+
+    public void init() {
+    }
+
     private FastCRUD<Map<String, Object>, Long> getCRUD(String namespace) {
+        init();
+
         if (!namespaces.containsKey(namespace))
             throw new IllegalStateException("命名空间 " + namespace + " 没有配置 BaseCRUD");
 
@@ -21,14 +28,14 @@ public class FastCRUD_Service implements FastCRUD_Controller {
 
     @Override
     public Map<String, Object> info(String namespace, Long id) {
-        return getCRUD(namespace).info(id);
+        return getCRUD(namespace).infoMap(id);
     }
 
     @Override
     public List<Map<String, Object>> list(String namespace) {
         String where = getWhereClause(Objects.requireNonNull(DataServiceUtils.getRequest()));
 
-        return getCRUD(namespace).list(where);
+        return getCRUD(namespace).listMap(where);
     }
 
     @Override

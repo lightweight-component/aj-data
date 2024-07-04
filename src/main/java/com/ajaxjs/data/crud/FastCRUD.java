@@ -30,12 +30,7 @@ import java.util.function.Consumer;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FastCRUD<T, K extends Serializable> extends BaseConfig {
-    /**
-     * Bean 实体
-     */
-    private T entity;
-
+public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
     /**
      * 实体类引用
      */
@@ -105,8 +100,8 @@ public class FastCRUD<T, K extends Serializable> extends BaseConfig {
      *
      * @return 列表（Map 格式）
      */
-    public List<Map<String, Object>> listMap() {
-        String sql = getListSql(null);
+    public List<Map<String, Object>> listMap(String where) {
+        String sql = getListSql(where);
 
         return dao.listMap(sql);
     }
@@ -117,9 +112,9 @@ public class FastCRUD<T, K extends Serializable> extends BaseConfig {
         if (StringUtils.hasText(sql))
             sql = SmallMyBatis.handleSql(sql, DataServiceUtils.getQueryStringParams());
         else {
-            if (isListOrderByDate()) {
+            if (isListOrderByDate())
                 sql = String.format(SELECT_SQL + " ORDER BY " + getTableFieldName().getCreateDateField() + " DESC", getTableName());
-            } else
+            else
                 sql = String.format(SELECT_SQL, getTableName());
         }
 

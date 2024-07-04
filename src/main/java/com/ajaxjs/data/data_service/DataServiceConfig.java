@@ -1,7 +1,6 @@
 package com.ajaxjs.data.data_service;
 
-import com.ajaxjs.data.crud.BaseConfig;
-import com.ajaxjs.data.crud.FastCRUD;
+import com.ajaxjs.data.crud.FastCRUD_Config;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,7 +12,7 @@ import java.util.Map;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DataServiceConfig extends BaseConfig {
+public class DataServiceConfig extends FastCRUD_Config {
     private Integer id;
 
     private Integer pid;

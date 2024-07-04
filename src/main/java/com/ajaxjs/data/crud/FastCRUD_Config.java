@@ -6,7 +6,7 @@ import lombok.Data;
  * 数据服务的基础配置字段
  */
 @Data
-public class BaseConfig {
+public class FastCRUD_Config {
     /**
      * 命名空间，标识
      */

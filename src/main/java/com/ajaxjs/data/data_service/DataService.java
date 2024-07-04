@@ -31,6 +31,12 @@ public abstract class DataService implements DataServiceController {
 
     public final Map<String, DataServiceConfig> namespaces = new HashMap<>();
 
+    /**
+     * 根据命名空间获取特定的 DataServiceConfig
+     *
+     * @param namespace 第一个命名空间标识
+     * @return 返回根据两个命名空间标识找到的 DataServiceConfig
+     */
     private DataServiceConfig getConfig(String namespace) {
         if (!namespaces.containsKey(namespace))
             throw new IllegalStateException("命名空间 " + namespace + " 没有配置 DataServiceConfig");
@@ -39,9 +45,9 @@ public abstract class DataService implements DataServiceController {
     }
 
     /**
-     * 根据命名空间获取特定的 BaseCRUD 实例
+     * 根据命名空间获取特定的 DataServiceConfig
      *
-     * @param namespace  第一个命名空间标识，
+     * @param namespace  第一个命名空间标识
      * @param namespace2 第二个命名空间标识
      * @return 返回根据两个命名空间标识找到的 DataServiceConfig
      */
@@ -105,7 +111,9 @@ public abstract class DataService implements DataServiceController {
         if (isSingle(config))
             crud.setListSql(config.getSql());
 
-        return crud.listMap();
+        String where = FastCRUD_Service.getWhereClause(Objects.requireNonNull(DataServiceUtils.getRequest()));
+
+        return crud.listMap(where);
     }
 
     @Override
