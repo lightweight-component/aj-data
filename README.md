@@ -8,18 +8,19 @@
 
 Tutorial: https://framework.ajaxjs.com/docs/aj/?section=data. Java Documents: https://dev.ajaxjs.com/docs/javadoc/aj-data/.
 
-AJ-Data boosts the CRUD development, not just an ORM library. There's three layers on architecture:
+AJ-Data boosts the CRUD development, not just an ORM library. There's three layers in architecture:
 
-- JDBC Connection, JDBC reader and writer. Inputs SQL String and Map params then outputs a value, or a Map, or a Java Bean, or a List.
-- CRUD Service, is a layer on top of the first layer, also the extender: FastCRUD provides Common Implementation for rapidly CRUD without a lot of coding, plus a simple REST API is ready.
-- DataService, is a layer on top of the second layer, to write your own SQL or logic on the Web page, then REST API is ready.
+- JDBC Connection, JDBC reader and writer, is like Spring JDBCTemplate or Apache Dbutils. It accepts SQL String and Map params then outputs a value, or a Map, or a Java Bean, or a List.
+- CRUD Service, is a layer on top of the first layer, also the extender: FastCRUD provides Common Implementation for rapidly CRUD operations without a lot of coding, plus a simple REST API is readily available.
+- DataService, is a layer on top of the second layer, to write your own SQL or logic on the Web page, then REST API is prepared.
 
-There's two main Data Format that we support, regardless of input or output parameters:
+
+We support two primary data formats for both input and output parameters:
 
 - Map<String, Object>
 - Java Bean
 
-Supports Database:
+Currently supported databases (with more to come):
 
 - MySQL
 - SQLite
@@ -38,7 +39,7 @@ Requires Java 1.8+, Maven Snippets:
 
 
 # 3rd Party Component that using
-This project based on Spring Framework, tested on Spring 5.x.
+This project's based on Spring Framework, tested on Spring 5.x.
 
 - Tomcat JDBC Connection Pool
 - [Snowflake](https://github.com/twitter/snowflake) 使用了 Twitter 的分布式自增 ID 算法 Snowflake：雪花生成器
