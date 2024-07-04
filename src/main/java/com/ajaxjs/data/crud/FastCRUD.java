@@ -73,6 +73,9 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
 
     /**
      * 获取单笔记录
+     *
+     * @param id 主键值，用于唯一标识一个实体
+     * @return 实体记录
      */
     public T info(K id) {
         Objects.requireNonNull(clz, "Please give Bean Class");
@@ -81,6 +84,9 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
 
     /**
      * 获取单笔记录
+     *
+     * @param id 主键值，用于唯一标识一个实体
+     * @return 包含实体详细信息的 Map 对象，键为字段名，值为字段值
      */
     public Map<String, Object> infoMap(K id) {
         return dao.infoMap(getManagedInfoSql(), id);
@@ -98,6 +104,7 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
     /**
      * 获取列表（Map 格式）
      *
+     * @param where 查询条件，用于筛选数据
      * @return 列表（Map 格式）
      */
     public List<Map<String, Object>> listMap(String where) {
@@ -149,7 +156,7 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
      * 根据指定的查询条件进行分页查询
      *
      * @param where 查询条件，用于筛选数据
-     * @return PageResult<T> 分页查询结果，包含查询到的数据及分页信息
+     * @return PageResult 分页查询结果，包含查询到的数据及分页信息
      */
     public PageResult<T> page(String where) {
         String sql = getListSql(where); // 构造查询 SQL 语句

@@ -50,7 +50,7 @@ public class TestFastCrudService extends BaseTest {
         fastCRUD.setListOrderByDate(true);
         fastCRUD.setTableFieldName(tableFieldName);
 
-        List<Map<String, Object>> list = fastCRUD.listMap();
+        List<Map<String, Object>> list = fastCRUD.listMap(null);
         System.out.println(list);
         assertNotNull(list);
 

@@ -76,6 +76,9 @@ public class SnowflakeId {
     /**
      * 获取时间戳，并与上次时间戳比较。
      * 等待下一个毫秒的到来， 保证返回的毫秒数在参数 lastTimestamp 之后
+     *
+     * @param lastTimestamp 上一个毫秒时间戳，作为比较的基准。
+     * @return 当前时间戳，保证大于输入的lastTimestamp。
      */
     public static long tilNextMillis(long lastTimestamp) {
         long timestamp = System.currentTimeMillis();

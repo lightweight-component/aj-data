@@ -21,6 +21,7 @@ public class FlatArrayToTree extends BaseTreeStrut {
      *
      * @param idType 节点ID的类型，用于泛型参数，确保类型安全
      * @param nodes  节点列表，包含所有需要转换的数据
+     * @param <T>    节点ID的类型，用于泛型参数，确保类型安全
      * @return 转换后的树状结构列表。
      */
     @SuppressWarnings("unchecked")

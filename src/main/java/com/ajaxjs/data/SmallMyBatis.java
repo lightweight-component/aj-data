@@ -31,6 +31,8 @@ public class SmallMyBatis {
 
     /**
      * 加载 XML SQL
+     *
+     * @param xmlFiles XML Files
      */
     public void loadXML(String... xmlFiles) {
         Pattern pattern = Pattern.compile("<!--.*?-->", Pattern.DOTALL);  // 使用 DOT ALL 匹配多行注释

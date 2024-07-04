@@ -85,6 +85,7 @@ public class DataServiceUtils {
      * @param obj        要执行方法的对象实例
      * @param methodName 要执行的方法的名称
      * @param clz        期望的返回类型
+     * @param <T>        期望的返回类型
      * @return 方法执行的结果，其类型为参数 clz 指定的类型
      * @throws RuntimeException 如果无法找到方法、访问方法失败或方法调用抛出异常，则抛出此运行时异常
      */
@@ -140,10 +141,9 @@ public class DataServiceUtils {
     /**
      * 初始化参数的封装方法。
      * 这是一个重载方法，调用的是另一个具有三个参数的 initParams 方法，其中最后一个参数默认为 false。
-     *
-     * @param namespace 命名空间，用于区分不同的参数集合。
-     * @param params    参数集合，以键值对的形式存储不同的参数。
-     * @return 返回一个初始化后的参数集合 Map。
+
+     * @param params    参数集合，以键值对的形式存储不同的参数
+     * @return 返回一个初始化后的参数集合 Map
      */
     public static Map<String, Object> initParams(Map<String, Object> params) {
         return initParams(params, false);

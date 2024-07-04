@@ -25,7 +25,7 @@ public class SqlInjectionAnalyzer extends TablesNamesFinder {
     private static final String DANGEROUS_FUNCTIONS = "(sleep|benchmark|extractvalue|updatexml|ST_LatFromGeoHash|ST_LongFromGeoHash|GTID_SUBSET|GTID_SUBTRACT|floor|ST_Pointfromgeohash"
             + "|geometrycollection|multipoint|polygon|multipolygon|linestring|multilinestring)";
 
-//    private static final ThreadLocal<Boolean> disableSubSelect = new ThreadLocal<Boolean>() {
+    //    private static final ThreadLocal<Boolean> disableSubSelect = new ThreadLocal<Boolean>() {
 //        @Override
 //        protected Boolean initialValue() {
 //            return true;
@@ -152,6 +152,9 @@ public class SqlInjectionAnalyzer extends TablesNamesFinder {
 
     /**
      * 如果{@link Column}没有定义table,且字段名为true/false(不区分大小写)则视为布尔常量
+     *
+     * @param column 待检查的列对象，它应该是一个{@link Column}类型的实例
+     * @return 如果列满足所有条件，则返回 true，表示该列应该被视为布尔常量；否则返回 false
      */
     public static boolean isBoolean(Column column) {
         return null != column && null == column.getTable() && BOL.matcher(column.getColumnName()).matches();
@@ -161,11 +164,12 @@ public class SqlInjectionAnalyzer extends TablesNamesFinder {
 
     /**
      * SQL 注入攻击分析器
-     * 对解析后的SQL对象执行注入攻击分析，有注入攻击的危险则抛出异常，
-     * 并通过{@code visitor}参数提供基于AST(抽象语法树)的遍历所有节点的能力。
+     * 对解析后的 SQL 对象执行注入攻击分析，有注入攻击的危险则抛出异常，
+     * 并通过{@code visitor}参数提供基于 AST (抽象语法树)的遍历所有节点的能力。
      *
      * @param sql SQL语句
-     * @throws SecurityException 输入的SQL语句有语法错误
+     * @return true 表示为攻击
+     * @throws SecurityException 输入的 SQL 语句有语法错误
      */
     public static boolean check(String sql) {
         boolean allowComplexParsing = CCJSqlParserUtil.getNestingDepth(sql) <= CCJSqlParserUtil.ALLOWED_NESTING_DEPTH;

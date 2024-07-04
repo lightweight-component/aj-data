@@ -140,6 +140,7 @@ public class JdbcReader extends JdbcConn {
      * @param sql    SQL 语句，可以带有 ? 的占位符
      * @param clz    期望的结果类型
      * @param params 插入到 SQL 中的参数，可单个可多个可不填
+     * @param <T>    值的类型
      * @return 数据库里面的值作为 T 出现
      */
     public <T> T queryOne(String sql, Class<T> clz, Object... params) {
@@ -178,6 +179,7 @@ public class JdbcReader extends JdbcConn {
      * @param sql    SQL 语句，可以带有 ? 的占位符
      * @param clz    注意 Integer.class 不能用 int.class 代替
      * @param params 插入到 SQL 中的参数，可单个可多个可不填
+     * @param <T>    值的类型
      * @return 数组结构的结果集合
      */
     @SuppressWarnings("unchecked")
@@ -197,6 +199,7 @@ public class JdbcReader extends JdbcConn {
      * 记录集合转换为 bean 的高阶函数
      *
      * @param beanClz 实体类
+     * @param <T>     bean 的类型
      * @return ResultSet 处理器，传入 ResultSet 类型对象返回 T 类型的 bean
      */
     @SuppressWarnings({"unchecked"})
@@ -303,6 +306,7 @@ public class JdbcReader extends JdbcConn {
      * @param beanClz Bean 实体的类
      * @param sql     SQL 语句，可以带有 ? 的占位符
      * @param params  插入到 SQL 中的参数，可单个可多个可不填
+     * @param <T>     bean 的类型
      * @return List&lt;Bean&gt; 结构的结果。如果查询不到任何数据返回 null。
      */
     public <T> List<T> queryAsBeanList(Class<T> beanClz, String sql, Object... params) {

@@ -14,6 +14,7 @@ public interface ResultSetProcessor<T> {
      * 转换结果
      *
      * @param rs JDBC 结果集合
+     * @return T
      * @throws SQLException SQL 异常
      */
     T process(ResultSet rs) throws SQLException;

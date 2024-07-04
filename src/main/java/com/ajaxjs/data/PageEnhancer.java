@@ -87,7 +87,8 @@ public class PageEnhancer {
     /**
      * 初始化分页器
      *
-     * @param sql SQL语句
+     * @param sql SQL 语句
+     * @param req Request
      * @return 初始化后的分页器
      */
     public PageEnhancer initSql(String sql, HttpServletRequest req) {
@@ -183,6 +184,7 @@ public class PageEnhancer {
      * 分页查询方法
      *
      * @param beanCls 实体类类型
+     * @param <T>     返回的 Bean 类型
      * @return 分页结果
      */
     @SuppressWarnings("unchecked")

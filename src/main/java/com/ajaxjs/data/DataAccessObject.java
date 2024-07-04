@@ -25,6 +25,7 @@ public interface DataAccessObject {
      * @param beanClz 返回的 Bean 类型
      * @param sql     SQL 语句
      * @param params  SQL 参数列表（选填项，能对应 SQL 里面的`?`的插值符）
+     * @param <T>     返回的 Bean 类型
      * @return 查询单笔记录，以 Java Bean 格式返回
      */
     <T> T info(Class<T> beanClz, String sql, Object... params);

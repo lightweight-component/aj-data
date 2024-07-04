@@ -396,6 +396,7 @@ public class JdbcWriter extends JdbcConn implements JdbcConstants {
      * 将一个 Map 转换成更新语句的 SqlParams 对象，可允许任意的过滤条件，而不只是 WHERE id = 1
      *
      * @param entity 实体，可以是 Map or Java Bean
+     * @param where  查询
      * @return 成功修改的行数，一般为 1
      */
     public int updateWhere(Object entity, String where) {

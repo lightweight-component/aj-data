@@ -6,11 +6,24 @@
 
 # Lightweight Data Access Object in Java
 
-Tutorial: https://framework.ajaxjs.com/docs/aj/?section=data.
+Tutorial: https://framework.ajaxjs.com/docs/aj/?section=data. Java Documents: https://dev.ajaxjs.com/docs/javadoc/aj-data/.
 
-Java Documents: https://dev.ajaxjs.com/docs/javadoc/aj-data/.
+AJ-Data boosts the CRUD development, not just an ORM library. There's three layers on architecture:
 
-DataService for rapidly CRUD.
+- JDBC Connection, JDBC reader and writer. Inputs SQL String and Map params then outputs a value, or a Map, or a Java Bean, or a List.
+- CRUD Service, is a layer on top of the first layer, also the extender: FastCRUD provides Common Implementation for rapidly CRUD without a lot of coding, plus a simple REST API is ready.
+- DataService, is a layer on top of the second layer, to write your own SQL or logic on the Web page, then REST API is ready.
+
+There's two main Data Format that we support, regardless of input or output parameters:
+
+- Map<String, Object>
+- Java Bean
+
+Supports Database:
+
+- MySQL
+- SQLite
+- Derby
 
 # Install
 Requires Java 1.8+, Maven Snippets:
@@ -22,15 +35,13 @@ Requires Java 1.8+, Maven Snippets:
     <version>1.1.6</version>
 </dependency>
 ```
-# Supports Database
 
-- MySQL
-- SQLite
-- Derby
 
-# 鸣谢
+# 3rd Party Component that using
+This project based on Spring Framework, tested on Spring 5.x.
 
-本人水平有限，该项目中引用了下面的源码。
+- Tomcat JDBC Connection Pool
+- [Snowflake](https://github.com/twitter/snowflake) 使用了 Twitter 的分布式自增 ID 算法 Snowflake：雪花生成器
+- JSqlParser, for list paging and SQL Injection protection
+- Apache Derby for unit test
 
-- 使用了 Twitter 的分布式自增 ID 算法 Snowflake：雪花生成器。
-- 数据层参考了开源项目：[memory](https://gitee.com/bitprince/memory)
