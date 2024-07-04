@@ -1,5 +1,7 @@
 package com.ajaxjs.data;
 
+import com.ajaxjs.data.data_service.DataServiceException;
+import com.ajaxjs.data.jdbc_helper.DatabaseVendor;
 import com.ajaxjs.data.jdbc_helper.JdbcReader;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -124,7 +126,11 @@ public class PageEnhancer {
 //            plainSelect.setLimit(limitObj);
 
 //            pageSql = selectStatement.toString();
-            pageSql = sql + " LIMIT " + start + ", " + limit;
+            if (jdbcReader.getDatabaseVendor() == DatabaseVendor.MYSQL)
+                pageSql = sql + " LIMIT " + start + ", " + limit;
+            else if (jdbcReader.getDatabaseVendor() == DatabaseVendor.DERBY)
+                pageSql = sql + " OFFSET " + start + " ROWS FETCH NEXT " + limit + " ROWS ONLY";
+            else throw new DataServiceException("TODO: add db vendor");
 
             // 移除 排序 语句
             if (sql.toUpperCase().contains("ORDER BY")) {

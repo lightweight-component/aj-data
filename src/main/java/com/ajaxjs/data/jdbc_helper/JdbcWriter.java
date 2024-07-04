@@ -1,6 +1,6 @@
 package com.ajaxjs.data.jdbc_helper;
 
-import com.ajaxjs.data.CRUD_Service;
+import com.ajaxjs.data.crud.CRUD_Service;
 import com.ajaxjs.data.DataAccessException;
 import com.ajaxjs.data.DataUtils;
 import com.ajaxjs.data.jdbc_helper.common.TableName;
@@ -38,6 +38,11 @@ public class JdbcWriter extends JdbcConn implements JdbcConstants {
     private static final LogHelper LOGGER = LogHelper.getLog(JdbcWriter.class);
 
     /**
+     * 当前数据库厂商，默认 MySQL
+     */
+    private DatabaseVendor databaseVendor = DatabaseVendor.MYSQL;
+
+    /**
      * id 字段名称，默认 id，可以是其他，如 news_id、xxx_id 等
      * 应该填数据库的，不要 bean 的驼峰风格
      */
@@ -70,6 +75,7 @@ public class JdbcWriter extends JdbcConn implements JdbcConstants {
 
     /**
      * 新建记录
+     * 也可以作为执行任意 SQL 的方法，例如执行 CreateTable
      *
      * @param sql    SQL 语句，可以带有 ? 的占位符
      * @param params 插入到 SQL 中的参数，可单个可多个可不填

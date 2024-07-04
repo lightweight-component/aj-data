@@ -36,7 +36,6 @@ public class TestJdbc {
         map.put("name", "Tom");
         map.put("age", 20);
 
-
         JdbcWriter.SqlParams sp = JdbcWriter.entity2UpdateSql(tableName, map, null, null);
 
         Assert.assertEquals("UPDATE users SET `name` = ?, `id` = ?, `age` = ?", sp.sql);

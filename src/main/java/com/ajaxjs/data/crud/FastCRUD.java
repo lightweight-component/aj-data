@@ -1,12 +1,15 @@
-package com.ajaxjs.data.data_service;
+package com.ajaxjs.data.crud;
 
 import com.ajaxjs.data.DataAccessObject;
 import com.ajaxjs.data.PageResult;
 import com.ajaxjs.data.SmallMyBatis;
-import com.ajaxjs.data.data_service.model.BaseDataServiceConfig;
+import com.ajaxjs.data.data_service.BaseEntityConstants;
+import com.ajaxjs.data.data_service.DataServiceUtils;
+import com.ajaxjs.data.data_service.TenantService;
 import com.ajaxjs.data.jdbc_helper.JdbcWriter;
 import com.ajaxjs.data.util.SnowflakeId;
 import com.ajaxjs.util.StrUtil;
+import com.ajaxjs.util.convert.EntityConvert;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.util.StringUtils;
@@ -14,15 +17,20 @@ import org.springframework.util.StringUtils;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
  * 通用实体快速的 CRUD。这个服务无须 DataService
+ * 提供默认 CRUD 的逻辑，包含常见情况的 SQL。
+ *
+ * @param <T> 实体类型，可以是 Bean 或者 Map
+ * @param <K> Id 类型，一般为 Long
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
+public class FastCRUD<T, K extends Serializable> extends BaseConfig {
     /**
      * Bean 实体
      */
@@ -35,10 +43,7 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
 
     private DataAccessObject dao;
 
-    /**
-     * 子配置
-     */
-    private Map<String, FastCRUD<?, Long>> children;
+    private JdbcWriter jdbcWriter;
 
     /**
      * 1=自增；2=雪花；3=UUID
@@ -47,9 +52,7 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
 
     public final static String DUMMY_STR = "1=1";
 
-    private final static String SELECT_SQL = "SELECT * FROM %s WHERE 1=1 ORDER BY create_date DESC"; // 日期暂时写死
-
-    private JdbcWriter jdbcWriter;
+    private final static String SELECT_SQL = "SELECT * FROM %s WHERE " + DUMMY_STR;
 
     /**
      * 根据当前的业务上下文，构造用于查询托管信息的 SQL 语句。
@@ -66,7 +69,7 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
             sql = SmallMyBatis.handleSql(sql, queryStringParams);   // 使用 SmallMyBatis 框架处理 SQL中的参数替换
         } else
             // 如果没有预定义SQL，则根据表名和ID字段生成一个默认的查询 SQL
-            sql = String.format(SELECT_SQL, getTableName()).replace(DUMMY_STR, DUMMY_STR + " AND " + getIdField() + " = ?");
+            sql = String.format(SELECT_SQL, getTableName()).replace(DUMMY_STR, DUMMY_STR + " AND " + getTableFieldName().getIdField() + " = ?");
 
         sql = limitToCurrentUser(sql);// 限制查询结果只包含当前用户的数据
 
@@ -77,6 +80,7 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
      * 获取单笔记录
      */
     public T info(K id) {
+        Objects.requireNonNull(clz, "Please give Bean Class");
         return dao.info(clz, getManagedInfoSql(), id);
     }
 
@@ -112,11 +116,15 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
 
         if (StringUtils.hasText(sql))
             sql = SmallMyBatis.handleSql(sql, DataServiceUtils.getQueryStringParams());
-        else
-            sql = String.format(SELECT_SQL, getTableName());
+        else {
+            if (isListOrderByDate()) {
+                sql = String.format(SELECT_SQL + " ORDER BY " + getTableFieldName().getCreateDateField() + " DESC", getTableName());
+            } else
+                sql = String.format(SELECT_SQL, getTableName());
+        }
 
-        if (isHasIsDeleted())
-            sql = sql.replace(DUMMY_STR, DUMMY_STR + " AND " + getDelField() + " != 1");
+        if (getTableFieldName().isHasIsDeleted())
+            sql = sql.replace(DUMMY_STR, DUMMY_STR + " AND " + getTableFieldName().getDelField() + " != 1");
 
         sql = limitToCurrentUser(sql);
 
@@ -137,6 +145,7 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
      */
     public List<T> list(String where) {
         String sql = getListSql(where);  // 构造查询SQL语句
+        Objects.requireNonNull(clz, "Please give Bean Class");
 
         return dao.list(clz, sql); // 执行查询操作，并返回结果列表
     }
@@ -151,6 +160,18 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
         String sql = getListSql(where); // 构造查询 SQL 语句
 
         return dao.page(clz, sql, null); // 执行分页查询，并返回结果
+    }
+
+    /**
+     * 根据指定的查询条件进行分页查询
+     *
+     * @param where 查询条件，用于筛选数据
+     * @return Map 分页查询结果，包含查询到的数据及分页信息
+     */
+    public PageResult<Map<String, Object>> pageMap(String where) {
+        String sql = getListSql(where); // 构造查询 SQL 语句
+
+        return dao.page(null, sql, null); // 执行分页查询，并返回结果
     }
 
     /**
@@ -170,15 +191,15 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
         String sql;
 
         // 根据是否有删除标记字段来构造不同的 SQL 语句
-        if (isHasIsDeleted())
-            sql = "UPDATE " + getTableName() + " SET " + getDelField() + " = 1";
+        if (getTableFieldName().isHasIsDeleted())
+            sql = "UPDATE " + getTableName() + " SET " + getTableFieldName().getDelField() + " = 1";
         else sql = "DELETE FROM " + getTableName();
 
-        sql += " WHERE " + DUMMY_STR + " AND " + getIdField() + " = ?";
+        sql += " WHERE " + DUMMY_STR + " AND " + getTableFieldName().getIdField() + " = ?";
         sql = limitToCurrentUser(sql); // 对 SQL 语句添加当前用户限制，确保操作的安全性
 
         if (beforeDelete != null)
-            sql = beforeDelete.apply(isHasIsDeleted(), sql);
+            sql = beforeDelete.apply(getTableFieldName().isHasIsDeleted(), sql);
 
         jdbcWriter.write(sql, id);// 执行 SQL 语句
 
@@ -219,12 +240,14 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
      */
     @SuppressWarnings("unchecked")
     public K create(Map<String, Object> params) {
+        String idField = getTableFieldName().getIdField();
+
         if (idType != null) { // auto increment by default
             if (idType == 2)
-                params.put(getIdField(), SnowflakeId.get());
+                params.put(getTableFieldName().getIdField(), SnowflakeId.get());
 
             if (idType == 3)
-                params.put(getIdField(), StrUtil.uuid());
+                params.put(idField, StrUtil.uuid());
         }
 
         if (beforeCreate != null)
@@ -238,7 +261,18 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
         if (isCurrentUserOnly())
             params.put("user_id", DataServiceUtils.getCurrentUserId());
 
-        return (K) dao.create(getTableName(), params, getIdField());
+        return (K) dao.create(getTableName(), params, idField);
+    }
+
+    /**
+     * 根据给定的bean实例创建一个新的 bean。
+     * 该方法通过将 bean 实例转换为 Map，然后使用该 Map 创建一个新的 bean。
+     *
+     * @param bean 需要被转换并用于创建新实例的原始b ean
+     * @return id
+     */
+    public K createBean(T bean) {
+        return create(EntityConvert.bean2Map(bean));
     }
 
     /**
@@ -255,7 +289,7 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
      */
     public Boolean update(Map<String, Object> params) {
         String tableName = getTableName(); // 获取表名
-        String idField = getIdField(); // 获取主键字段名
+        String idField = getTableFieldName().getIdField(); // 获取主键字段名
 
         // 检查是否仅允许当前用户修改
         if (isCurrentUserOnly()) {
@@ -270,5 +304,16 @@ public class FastCRUD<T, K extends Serializable> extends BaseDataServiceConfig {
             beforeUpdate.accept(params);
 
         return dao.update(tableName, params, idField);// 执行更新操作
+    }
+
+    /**
+     * 更新数据库中的实体对象。
+     * 本方法通过将传入的实体对象转换为Map格式，然后调用 update方法来更新数据库中对应的记录。
+     *
+     * @param bean 待更新的实体对象，它必须是一个非空的实例
+     * @return 更新操作的结果，通常是一个表示操作是否成功的 Boolean 值
+     */
+    public Boolean updateBean(T bean) {
+        return update(EntityConvert.bean2Map(bean));
     }
 }

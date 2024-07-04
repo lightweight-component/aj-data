@@ -10,7 +10,7 @@ Tutorial: https://framework.ajaxjs.com/docs/aj/?section=data.
 
 Java Documents: https://dev.ajaxjs.com/docs/javadoc/aj-data/.
 
-DataService for rapidly CRUD
+DataService for rapidly CRUD.
 
 # Install
 Requires Java 1.8+, Maven Snippets:
@@ -22,6 +22,11 @@ Requires Java 1.8+, Maven Snippets:
     <version>1.1.6</version>
 </dependency>
 ```
+# Supports Database
+
+- MySQL
+- SQLite
+- Derby
 
 # 鸣谢
 

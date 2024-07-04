@@ -1,5 +1,6 @@
-package com.ajaxjs.data;
+package com.ajaxjs.data.crud;
 
+import com.ajaxjs.data.*;
 import com.ajaxjs.data.data_service.DataServiceUtils;
 import com.ajaxjs.data.jdbc_helper.JdbcReader;
 import com.ajaxjs.data.jdbc_helper.JdbcWriter;

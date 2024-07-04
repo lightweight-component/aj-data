@@ -28,6 +28,11 @@ public class JdbcReader extends JdbcConn {
     private static final LogHelper LOGGER = LogHelper.getLog(JdbcReader.class);
 
     /**
+     * 当前数据库厂商，默认 MySQL
+     */
+    private DatabaseVendor databaseVendor = DatabaseVendor.MYSQL;
+
+    /**
      * 执行查询
      *
      * @param <T>       结果的类型
@@ -302,5 +307,13 @@ public class JdbcReader extends JdbcConn {
      */
     public <T> List<T> queryAsBeanList(Class<T> beanClz, String sql, Object... params) {
         return executeQuery(rs -> forEachRs(rs, getResultBean(beanClz)), sql, params);
+    }
+
+    public DatabaseVendor getDatabaseVendor() {
+        return databaseVendor;
+    }
+
+    public void setDatabaseVendor(DatabaseVendor databaseVendor) {
+        this.databaseVendor = databaseVendor;
     }
 }

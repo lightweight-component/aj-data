@@ -1,4 +1,4 @@
-package com.ajaxjs.data.data_service.model;
+package com.ajaxjs.data.crud;
 
 import lombok.Data;
 
@@ -6,34 +6,26 @@ import lombok.Data;
  * 数据服务的基础配置字段
  */
 @Data
-public class BaseDataServiceConfig {
-    private Integer id;
-
-    private Integer pid;
-
-    /**
-     * 说明
-     */
-    private String name;
-    /**
-     * 类型 SINGLE | CRUD
-     */
-    private String type;
-
+public class BaseConfig {
     /**
      * 命名空间，标识
      */
     private String namespace;
 
     /**
-     * 主键字段名称
-     */
-    private String idField = "id";
-
-    /**
      * 表名
      */
     private String tableName;
+
+    /**
+     * 具体表里面的各个字段是什么名称，这里指定
+     */
+    private TableFieldName tableFieldName;
+
+    /**
+     * 查询列表的时候，是否自动加上按照日期排序
+     */
+    private boolean listOrderByDate = true;
 
     /**
      * 实体类引用名称
@@ -71,11 +63,6 @@ public class BaseDataServiceConfig {
     private String deleteSql;
 
     /**
-     * 是否有逻辑删除标记
-     */
-    private boolean hasIsDeleted;
-
-    /**
      * 是否加入租户数据隔离
      */
     private boolean isTenantIsolation;
@@ -84,11 +71,6 @@ public class BaseDataServiceConfig {
      * 当前用户的约束
      */
     private boolean isCurrentUserOnly;
-
-    /**
-     * 删除字段名称
-     */
-    private String delField = "is_deleted";
 
     /**
      * 1=自增；2=雪花；3=UUID

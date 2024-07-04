@@ -1,8 +1,10 @@
 package com.ajaxjs.data.data_service;
 
+import com.ajaxjs.data.DataUtils;
 import com.ajaxjs.util.TestHelper;
 import com.ajaxjs.util.convert.ConvertBasicValue;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -10,6 +12,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,11 +31,9 @@ public class DataServiceUtils {
      * @return 包含查询参数的Map，如果不存在查询参数则返回 null
      */
     public static Map<String, Object> getQueryStringParams() {
-        // 从DiContextUtil中获取当前的HttpServletRequest对象
         HttpServletRequest request = getRequest();
         assert request != null;
-        // 获取请求中的所有参数，包括参数名和参数值的数组
-        Map<String, String[]> parameterMap = request.getParameterMap();
+        Map<String, String[]> parameterMap = request.getParameterMap(); // 获取请求中的所有参数，包括参数名和参数值的数组
 
         if (ObjectUtils.isEmpty(parameterMap)) // 如果参数Map为空，则直接返回 null
             return null;
@@ -78,7 +79,6 @@ public class DataServiceUtils {
         return ((ServletRequestAttributes) requestAttributes).getRequest();
     }
 
-
     /**
      * 执行对象上的指定方法，并返回方法的执行结果。
      *
@@ -113,8 +113,8 @@ public class DataServiceUtils {
         // 从请求中获取名为"USER_KEY_IN_REQUEST"的属性，确保该属性不为空
         Object simpleUser = Objects.requireNonNull(DataServiceUtils.getRequest()).getAttribute("USER_KEY_IN_REQUEST");
 
-        if (simpleUser == null)
-            throw new NullPointerException("上下文的用户不存在"); // 如果用户对象为空，则抛出异常
+//        if (simpleUser == null)
+//            throw new NullPointerException("上下文的用户不存在"); // 如果用户对象为空，则抛出异常
 
         return simpleUser;
     }
@@ -135,5 +135,48 @@ public class DataServiceUtils {
      */
     public static Integer getCurrentUserTenantId() {
         return executeMethod(getCurrentUser(), "getTenantId", Integer.class);// 调用用户对象的 getId 方法，返回用户的 ID
+    }
+
+    /**
+     * 初始化参数的封装方法。
+     * 这是一个重载方法，调用的是另一个具有三个参数的 initParams 方法，其中最后一个参数默认为 false。
+     *
+     * @param namespace 命名空间，用于区分不同的参数集合。
+     * @param params    参数集合，以键值对的形式存储不同的参数。
+     * @return 返回一个初始化后的参数集合 Map。
+     */
+    public static Map<String, Object> initParams(Map<String, Object> params) {
+        return initParams(params, false);
+    }
+
+    /**
+     * 初始化参数
+     *
+     * @param params           原始参数映射
+     * @param isFormSubmitOnly 是否仅处理表单提交的参数
+     * @return 处理后的参数映射
+     */
+    public static Map<String, Object> initParams(Map<String, Object> params, boolean isFormSubmitOnly) {
+        if (isFormSubmitOnly) {
+            HttpServletRequest req = DataServiceUtils.getRequest();
+            assert req != null;
+            String queryString = req.getQueryString(); // 获取查询字符串
+
+            // 解码查询字符串并处理参数
+            if (StringUtils.hasText(queryString)) {
+                queryString = StringUtils.uriDecode(queryString, StandardCharsets.UTF_8);
+                String[] parameters = queryString.split("&");
+
+                for (String parameter : parameters) {// 从 params 中移除查询字符串中的参数
+                    String[] keyValuePair = parameter.split("=");
+                    params.remove(keyValuePair[0]);
+                }
+            }
+        }
+
+        Map<String, Object> _params = new HashMap<>(); // 创建新的参数映射，并将原始参数转换为指定格式
+        params.forEach((key, value) -> _params.put(DataUtils.changeFieldToColumnName(key), ConvertBasicValue.toJavaValue(value.toString())));
+
+        return _params;
     }
 }
