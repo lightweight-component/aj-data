@@ -85,18 +85,23 @@ public class FastCRUD_Service implements FastCRUD_Controller {
 
             // 处理单值参数
             if (parameterValues.length == 1) {
+                String value = DataServiceUtils.escapeSqlInjection(parameterValues[0]).trim();
                 whereClause.append(" = ");
-                whereClause.append("'").append(parameterValues[0]).append("'");
+                whereClause.append("'").append(value).append("'");
             } else {
                 // 处理数组参数
                 whereClause.append(" IN (");
-                for (String parameterValue : parameterValues) {
-                    whereClause.append("'");
-                    whereClause.append(parameterValue);
-                    whereClause.append("',");
+
+                if (parameterValues.length > 0) {
+                    for (String parameterValue : parameterValues) {
+                        whereClause.append("'");
+                        whereClause.append(DataServiceUtils.escapeSqlInjection(parameterValue).trim());
+                        whereClause.append("',");
+                    }
+
+                    whereClause.deleteCharAt(whereClause.length() - 1);
                 }
 
-                whereClause.deleteCharAt(whereClause.length() - 1);
                 whereClause.append(")");
             }
         }

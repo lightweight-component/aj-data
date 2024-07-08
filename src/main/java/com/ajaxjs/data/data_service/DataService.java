@@ -3,8 +3,10 @@ package com.ajaxjs.data.data_service;
 import com.ajaxjs.data.DataAccessObject;
 import com.ajaxjs.data.PageResult;
 import com.ajaxjs.data.SmallMyBatis;
+import com.ajaxjs.data.crud.CRUD_Service;
 import com.ajaxjs.data.crud.FastCRUD;
 import com.ajaxjs.data.crud.FastCRUD_Service;
+import com.ajaxjs.data.crud.TableFieldName;
 import com.ajaxjs.data.jdbc_helper.JdbcWriter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +27,6 @@ import java.util.function.Consumer;
 @Slf4j
 @Data
 public abstract class DataService implements DataServiceController {
-    private JdbcWriter jdbcWriter;
-
     private DataAccessObject dao;
 
     public final Map<String, DataServiceConfig> namespaces = new HashMap<>();
@@ -77,7 +77,7 @@ public abstract class DataService implements DataServiceController {
     private FastCRUD<Map<String, Object>, Long> initFastCRUD(DataServiceConfig config) {
         FastCRUD<Map<String, Object>, Long> crud = new FastCRUD<>();
         BeanUtils.copyProperties(config, crud);
-        crud.setDao(dao);
+        crud.setDao(getDao());
 
         return crud;
     }
@@ -112,6 +112,7 @@ public abstract class DataService implements DataServiceController {
             crud.setListSql(config.getSql());
 
         String where = FastCRUD_Service.getWhereClause(Objects.requireNonNull(DataServiceUtils.getRequest()));
+        System.out.println("ds:" + getDao().hashCode());
 
         return crud.listMap(where);
     }
@@ -164,6 +165,7 @@ public abstract class DataService implements DataServiceController {
 
         if (StringUtils.hasText(config.getCreateSql())) {
             String sql = SmallMyBatis.handleSql(config.getCreateSql(), params);
+            JdbcWriter jdbcWriter = ((CRUD_Service) dao).getWriter();
 
             return (Long) jdbcWriter.insert(sql);
         } else {// 无 SQL
@@ -198,6 +200,7 @@ public abstract class DataService implements DataServiceController {
 
         if (StringUtils.hasText(config.getUpdateSql())) {
             String sql = SmallMyBatis.handleSql(config.getUpdateSql(), params);
+            JdbcWriter jdbcWriter = ((CRUD_Service) dao).getWriter();
 
             return jdbcWriter.write(sql) > 0;
         } else {// 无 SQL
@@ -234,6 +237,7 @@ public abstract class DataService implements DataServiceController {
                 sql = beforeDelete.apply(config.getTableFieldName().isHasIsDeleted(), sql);
 
             sql = SmallMyBatis.handleSql(sql, null);
+            JdbcWriter jdbcWriter = ((CRUD_Service) dao).getWriter();
 
             return jdbcWriter.write(sql, id) > 0;
         } else {// 无 SQL
@@ -283,6 +287,10 @@ public abstract class DataService implements DataServiceController {
 //
 //                if (beforeDelete != null)
 //                    crud.setBeforeDelete(beforeDelete);
+                // TODO
+                TableFieldName t = new TableFieldName();
+                t.setHasIsDeleted(false);
+                config.setTableFieldName(t);
 
                 // 如果 pid 为 -1，表示为顶级配置，将其添加到 namespaces 中，并初始化其 children 属性
                 if (config.getPid() == -1) {

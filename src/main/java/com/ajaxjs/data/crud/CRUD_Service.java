@@ -2,6 +2,7 @@ package com.ajaxjs.data.crud;
 
 import com.ajaxjs.data.*;
 import com.ajaxjs.data.data_service.DataServiceUtils;
+import com.ajaxjs.data.jdbc_helper.DatabaseVendor;
 import com.ajaxjs.data.jdbc_helper.JdbcReader;
 import com.ajaxjs.data.jdbc_helper.JdbcWriter;
 import com.ajaxjs.data.jdbc_helper.common.IdField;
@@ -13,6 +14,7 @@ import lombok.experimental.Accessors;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
+import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 
@@ -220,5 +222,19 @@ public class CRUD_Service implements DataAccessObject {
             throw new DataAccessException("没设置 IdField 注解，不知哪个主键字段");
 
         return annotation.value();
+    }
+
+    public static CRUD_Service factory(Connection conn) {
+        JdbcWriter writer = new JdbcWriter();
+        writer.setConn(conn);
+
+        JdbcReader reader = new JdbcReader();
+        reader.setConn(conn);
+
+        CRUD_Service crud = new CRUD_Service();
+        crud.setReader(reader);
+        crud.setWriter(writer);
+
+        return crud;
     }
 }

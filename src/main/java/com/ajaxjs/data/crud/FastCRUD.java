@@ -119,9 +119,12 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
         if (StringUtils.hasText(sql))
             sql = SmallMyBatis.handleSql(sql, DataServiceUtils.getQueryStringParams());
         else {
-            if (isListOrderByDate())
-                sql = String.format(SELECT_SQL + " ORDER BY " + getTableFieldName().getCreateDateField() + " DESC", getTableName());
-            else
+            if (isListOrderByDate()) {
+                String createDateField = getTableFieldName().getCreateDateField();
+                String tableName = getTableName();
+
+                sql = String.format(SELECT_SQL + " ORDER BY " + createDateField + " DESC", tableName);
+            } else
                 sql = String.format(SELECT_SQL, getTableName());
         }
 
