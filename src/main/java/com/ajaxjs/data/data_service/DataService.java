@@ -309,6 +309,8 @@ public abstract class DataService implements DataServiceController {
             }
         } else log.warn("没有 DataService 的配置");
 
+        log.info("加载 DataService 配置成功！");
+
         return true;
     }
 
