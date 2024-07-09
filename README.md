@@ -6,13 +6,11 @@
 
 # Lightweight Data Access Object in Java
 
-Tutorial: https://framework.ajaxjs.com/docs/aj/?section=data. Java Documents: https://dev.ajaxjs.com/docs/javadoc/aj-data/.
-
 AJ-Data boosts the CRUD development, not just an ORM library. There's three layers in architecture:
 
 1. JDBC Connection, JDBC reader and writer, is like Spring JDBCTemplate or Apache Dbutils. It accepts SQL String and Map params then outputs a value, or a Map, or a Java Bean, or a List.
 1. CRUD Service, is a layer on top of the first layer, also the extender: FastCRUD provides the Common Implementation for rapidly CRUD operations without a lot of coding, plus a simple REST API is readily available.
-1. DataService, is a layer on top of the second layer, to write your own SQL or logic on the Web page, then REST API is prepared. More Info pls check out [here](../dataservice-ui).
+1. DataService, is a layer on top of the second layer, to write your own SQL or logic on the Web page, then REST API is prepared. More Info pls check out [here](https://github.com/lightweight-component/dataservice-ui).
 
 
 We support two primary data formats for both input and output parameters:
@@ -27,7 +25,7 @@ Currently supported databases (with more to come):
 - SQLite
 - Derby
 
-For more information, please visit https://framework.ajaxjs.com/docs/aj/?section=data.
+Java Documents: https://dev.ajaxjs.com/docs/javadoc/aj-data/. For more information, please visit https://framework.ajaxjs.com/docs/aj/?section=data.
 
 # Install
 Requires Java 1.8+, Maven Snippets:
