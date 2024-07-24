@@ -20,7 +20,7 @@ public class FastCRUD_Config {
     /**
      * 具体表里面的各个字段是什么名称，这里指定
      */
-    private TableFieldName tableFieldName;
+    private TableModel tableModel;
 
     /**
      * 查询列表的时候，是否自动加上按照日期排序

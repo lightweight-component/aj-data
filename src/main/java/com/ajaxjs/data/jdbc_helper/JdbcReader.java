@@ -7,6 +7,7 @@ import com.ajaxjs.util.convert.EntityConvert;
 import com.ajaxjs.util.logger.LogHelper;
 import com.ajaxjs.util.reflect.Methods;
 import com.ajaxjs.util.reflect.NewInstance;
+import com.ajaxjs.util.reflect.Types;
 import lombok.extern.slf4j.Slf4j;
 
 import java.beans.IntrospectionException;
@@ -78,12 +79,17 @@ public class JdbcReader extends JdbcConn {
             String key = DataUtils.changeColumnToFieldName(metaData.getColumnLabel(i));
             Object value = rs.getObject(i);
 
-//            log.debug(columnName+"::"+columnTypeName);
+//            log.debug(key+"::"+metaData.getColumnTypeName(i));
             /* mysql 8 json 字段对应 jdbc 的类型是？有没有办法让 jdbc 得知这个是一个 json 类型的字段？ */
             if (value != null && JSON_TYPE_MYSQL8.equals(metaData.getColumnTypeName(i))) {
-                String jsonStr = value.toString();
 
-                value = jsonStr.startsWith("[") ? EntityConvert.json2MapList(jsonStr) : EntityConvert.json2map(jsonStr);
+                /* JSON 类型会返回字符串 null 而不是 null */
+                if ("null".equals(value))
+                    value = null;
+                else {
+                    String jsonStr = value.toString();
+                    value = jsonStr.startsWith("[") ? EntityConvert.json2MapList(jsonStr) : EntityConvert.json2map(jsonStr);
+                }
             }
 
             map.put(key, value);
@@ -228,6 +234,10 @@ public class JdbcReader extends JdbcConn {
                 String key = metaData.getColumnLabel(i);
                 Object _value = rs.getObject(i); // Real value in DB
 
+//                if (key.startsWith("table_model") && _value != null) {
+//                    log.debug(key + ":v:" + _value);
+//                    log.debug(key + "::" + metaData.getColumnTypeName(i));
+//                }
                 if (key.contains("_")) // 将以下划线分隔的数据库字段转换为驼峰风格的字符串
                     key = DataUtils.changeColumnToFieldName(key);
 
@@ -237,18 +247,42 @@ public class JdbcReader extends JdbcConn {
                     Object value;
                     Class<?> propertyType = property.getPropertyType();
 
+//                    if (key.startsWith("table_model"))
+//                        log.debug(key + "::" + metaData.getColumnTypeName(i));
+
                     // 枚举类型的支持
 //					if (propertyType.isEnum()) // Enum.class.isAssignableFrom(propertyType) 这个方法也可以
 //						value = dbValue2Enum(propertyType, _value);
 //					else {
-                    try {
-                        value = ConvertBasicValue.basicConvert(_value, propertyType);
-                    } catch (NumberFormatException e) {
+
+                    if (_value != null && JSON_TYPE_MYSQL8.equals(metaData.getColumnTypeName(i))) {
+                        /* JSON 类型会返回字符串 null 而不是 null */
+                        if ("null".equals(_value))
+                            value = null;
+                        else {
+                            String jsonStr = _value.toString();
+
+                            if (jsonStr.startsWith("{"))
+//                        value = ConvertComplexValue.getConvertValue().convert(jsonStr, propertyType);
+                                value = EntityConvert.json2bean(jsonStr, propertyType);
+                            else if (jsonStr.startsWith("[")) {
+//                            Class<?> listType =  propertyType; // it might be a List
+                                Class<?> _beanClz = Types.getGenericFirstReturnType(property.getReadMethod());
+                                value = EntityConvert.json2BeanList(jsonStr, _beanClz);
+                            } else {
+                                value = null;
+                                log.warn("非法 JSON 字符串： " + jsonStr);
+                            }
+                        }
+                    } else
+                        try {
+                            value = ConvertBasicValue.basicConvert(_value, propertyType);
+                        } catch (NumberFormatException e) {
 //                        String input = value.getClass().toString();
 //                        String expect = property.getPropertyType().toString();
 //                        LOGGER.warning(e, "保存数据到 bean 的 {0} 字段时，转换失败，输入值：{1}，输入类型 ：{2}， 期待类型：{3}", key, "", "", expect);
-                        continue; // 转换失败，继续下一个字段
-                    }
+                            continue; // 转换失败，继续下一个字段
+                        }
 //					}
 
                     Methods.executeMethod(bean, method, value);

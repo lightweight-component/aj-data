@@ -44,11 +44,11 @@ public class TestFastCrudService extends BaseTest {
         fastCRUD.setTableName("Employees");
 
         // 列表排序按照 hire_date 字段排序，默认是 create_date，现改之
-        TableFieldName tableFieldName = new TableFieldName();
-        tableFieldName.setCreateDateField("hire_date");
+        TableModel tableModel = new TableModel();
+        tableModel.setCreateDateField("hire_date");
 
         fastCRUD.setListOrderByDate(true);
-        fastCRUD.setTableFieldName(tableFieldName);
+        fastCRUD.setTableModel(tableModel);
 
         List<Map<String, Object>> list = fastCRUD.listMap(null);
         System.out.println(list);
@@ -59,7 +59,7 @@ public class TestFastCrudService extends BaseTest {
         fastCRUD2.setClz(Employee.class);
         fastCRUD2.setTableName("Employees");
         fastCRUD2.setListOrderByDate(true);
-        fastCRUD2.setTableFieldName(tableFieldName);
+        fastCRUD2.setTableModel(tableModel);
 
         List<Employee> list2 = fastCRUD2.list();
         System.out.println(list2);
@@ -72,11 +72,11 @@ public class TestFastCrudService extends BaseTest {
         fastCRUD.setTableName("Employees");
 
         // 列表排序按照 hire_date 字段排序，默认是 create_date，现改之
-        TableFieldName tableFieldName = new TableFieldName();
+        TableModel tableFieldName = new TableModel();
         tableFieldName.setCreateDateField("hire_date");
 
         fastCRUD.setListOrderByDate(true);
-        fastCRUD.setTableFieldName(tableFieldName);
+        fastCRUD.setTableModel(tableFieldName);
 
         PageResult<Map<String, Object>> list = fastCRUD.pageMap(null);
         System.out.println(list.size());
@@ -87,7 +87,7 @@ public class TestFastCrudService extends BaseTest {
         fastCRUD2.setClz(Employee.class);
         fastCRUD2.setTableName("Employees");
         fastCRUD2.setListOrderByDate(true);
-        fastCRUD2.setTableFieldName(tableFieldName);
+        fastCRUD2.setTableModel(tableFieldName);
 
         PageResult<Employee> list2 = fastCRUD2.page(null);
         System.out.println(list2);

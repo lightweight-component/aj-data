@@ -1,16 +1,23 @@
 package com.ajaxjs.data.crud;
 
+import com.ajaxjs.data.data_service.BaseEntityConstants;
 import lombok.Data;
 
 /**
  * 具体表里面的各个字段是什么名称，这里指定
  */
 @Data
-public class TableFieldName {
+public class TableModel {
     /**
      * id 的字段名称
      */
     private String idField = "id";
+
+    /**
+     * ID 类型，可以是自增、雪花算法、UUID
+     */
+    private Integer idType = BaseEntityConstants.IdType.AUTO_INC;
+
     /**
      * 名称 的字段名称
      */

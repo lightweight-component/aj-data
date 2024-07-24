@@ -258,7 +258,7 @@ public class JdbcWriter extends JdbcConn implements JdbcConstants {
     private static Object beanValue2SqlValue(Object value) {
         if (value instanceof Enum) // 枚举类型，取其字符串保存
             return value.toString();
-        else if (value.equals(NULL_DATE) || value.equals(NULL_INT) || value.equals(NULL_LONG) || value.equals(NULL_STRING)) // 如何设数据库 null 值
+        else if (NULL_DATE.equals(value) || NULL_INT.equals(value) || NULL_LONG.equals(value) || NULL_STRING.equals(value)) // 如何设数据库 null 值
             return null;
         else
             return value;

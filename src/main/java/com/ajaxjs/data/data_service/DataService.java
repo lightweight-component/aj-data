@@ -6,7 +6,7 @@ import com.ajaxjs.data.SmallMyBatis;
 import com.ajaxjs.data.crud.CRUD_Service;
 import com.ajaxjs.data.crud.FastCRUD;
 import com.ajaxjs.data.crud.FastCRUD_Service;
-import com.ajaxjs.data.crud.TableFieldName;
+import com.ajaxjs.data.crud.TableModel;
 import com.ajaxjs.data.jdbc_helper.JdbcWriter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +78,9 @@ public abstract class DataService implements DataServiceController {
         FastCRUD<Map<String, Object>, Long> crud = new FastCRUD<>();
         BeanUtils.copyProperties(config, crud);
         crud.setDao(getDao());
+        crud.setBeforeCreate(beforeCreate);
+        crud.setBeforeUpdate(beforeUpdate);
+        crud.setBeforeDelete(beforeDelete);
 
         return crud;
     }
@@ -234,7 +237,7 @@ public abstract class DataService implements DataServiceController {
 
         if (StringUtils.hasText(sql)) {
             if (beforeDelete != null)
-                sql = beforeDelete.apply(config.getTableFieldName().isHasIsDeleted(), sql);
+                sql = beforeDelete.apply(config.getTableModel().isHasIsDeleted(), sql);
 
             sql = SmallMyBatis.handleSql(sql, null);
             JdbcWriter jdbcWriter = ((CRUD_Service) dao).getWriter();
@@ -287,10 +290,11 @@ public abstract class DataService implements DataServiceController {
 //
 //                if (beforeDelete != null)
 //                    crud.setBeforeDelete(beforeDelete);
-                // TODO
-                TableFieldName t = new TableFieldName();
-                t.setHasIsDeleted(false);
-                config.setTableFieldName(t);
+                if (config.getTableModel() == null) {
+                    TableModel t = new TableModel();
+                    t.setHasIsDeleted(false);
+                    config.setTableModel(t);
+                }
 
                 // 如果 pid 为 -1，表示为顶级配置，将其添加到 namespaces 中，并初始化其 children 属性
                 if (config.getPid() == -1) {
@@ -318,20 +322,20 @@ public abstract class DataService implements DataServiceController {
      * 创建之前的执行的回调函数，可以设置 createDate, createBy 等字段
      */
     @Autowired(required = false)
-    @Qualifier("CRUD_beforeCreate")
+    @Qualifier("DS_beforeCreate")
     private Consumer<Map<String, Object>> beforeCreate;
 
     /**
      * 创建之前的执行的回调函数，可以设置 updateDate, updateBy 等字段
      */
     @Autowired(required = false)
-    @Qualifier("beforeUpdate")
+    @Qualifier("DS_beforeUpdate")
     private Consumer<Map<String, Object>> beforeUpdate;
 
     /**
      * 删除之前的执行的回调函数，可以设置 updateDate, updateBy 等字段
      */
     @Autowired(required = false)
-    @Qualifier("beforeDelete")
+    @Qualifier("DS_beforeDelete")
     private BiFunction<Boolean, String, String> beforeDelete;
 }

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>ajaxjs-data</artifactId>
     <name>aj-data</name>
-    <version>1.1.6</version>
+    <version>1.1.7</version>
     <description>Lightweight Data Access Object</description>
     <packaging>jar</packaging>
 

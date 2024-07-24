@@ -64,7 +64,7 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
             sql = SmallMyBatis.handleSql(sql, queryStringParams);   // 使用 SmallMyBatis 框架处理 SQL中的参数替换
         } else
             // 如果没有预定义SQL，则根据表名和ID字段生成一个默认的查询 SQL
-            sql = String.format(SELECT_SQL, getTableName()).replace(DUMMY_STR, DUMMY_STR + " AND " + getTableFieldName().getIdField() + " = ?");
+            sql = String.format(SELECT_SQL, getTableName()).replace(DUMMY_STR, DUMMY_STR + " AND " + getTableModel().getIdField() + " = ?");
 
         sql = limitToCurrentUser(sql);// 限制查询结果只包含当前用户的数据
 
@@ -120,7 +120,7 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
             sql = SmallMyBatis.handleSql(sql, DataServiceUtils.getQueryStringParams());
         else {
             if (isListOrderByDate()) {
-                String createDateField = getTableFieldName().getCreateDateField();
+                String createDateField = getTableModel().getCreateDateField();
                 String tableName = getTableName();
 
                 sql = String.format(SELECT_SQL + " ORDER BY " + createDateField + " DESC", tableName);
@@ -128,8 +128,8 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
                 sql = String.format(SELECT_SQL, getTableName());
         }
 
-        if (getTableFieldName().isHasIsDeleted())
-            sql = sql.replace(DUMMY_STR, DUMMY_STR + " AND " + getTableFieldName().getDelField() + " != 1");
+        if (getTableModel().isHasIsDeleted())
+            sql = sql.replace(DUMMY_STR, DUMMY_STR + " AND " + getTableModel().getDelField() + " != 1");
 
         sql = limitToCurrentUser(sql);
 
@@ -196,15 +196,18 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
         String sql;
 
         // 根据是否有删除标记字段来构造不同的 SQL 语句
-        if (getTableFieldName().isHasIsDeleted())
-            sql = "UPDATE " + getTableName() + " SET " + getTableFieldName().getDelField() + " = 1";
+        if (getTableModel().isHasIsDeleted())
+            sql = "UPDATE " + getTableName() + " SET " + getTableModel().getDelField() + " = 1";
         else sql = "DELETE FROM " + getTableName();
 
-        sql += " WHERE " + DUMMY_STR + " AND " + getTableFieldName().getIdField() + " = ?";
+        sql += " WHERE " + DUMMY_STR + " AND " + getTableModel().getIdField() + " = ?";
         sql = limitToCurrentUser(sql); // 对 SQL 语句添加当前用户限制，确保操作的安全性
 
         if (beforeDelete != null)
-            sql = beforeDelete.apply(getTableFieldName().isHasIsDeleted(), sql);
+            sql = beforeDelete.apply(getTableModel().isHasIsDeleted(), sql);
+
+        if (jdbcWriter == null && getDao() != null)
+            jdbcWriter = ((CRUD_Service) getDao()).getWriter();
 
         jdbcWriter.write(sql, id);// 执行 SQL 语句
 
@@ -245,11 +248,11 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
      */
     @SuppressWarnings("unchecked")
     public K create(Map<String, Object> params) {
-        String idField = getTableFieldName().getIdField();
+        String idField = getTableModel().getIdField();
 
         if (idType != null) { // auto increment by default
             if (idType == 2)
-                params.put(getTableFieldName().getIdField(), SnowflakeId.get());
+                params.put(getTableModel().getIdField(), SnowflakeId.get());
 
             if (idType == 3)
                 params.put(idField, StrUtil.uuid());
@@ -294,7 +297,7 @@ public class FastCRUD<T, K extends Serializable> extends FastCRUD_Config {
      */
     public Boolean update(Map<String, Object> params) {
         String tableName = getTableName(); // 获取表名
-        String idField = getTableFieldName().getIdField(); // 获取主键字段名
+        String idField = getTableModel().getIdField(); // 获取主键字段名
 
         // 检查是否仅允许当前用户修改
         if (isCurrentUserOnly()) {

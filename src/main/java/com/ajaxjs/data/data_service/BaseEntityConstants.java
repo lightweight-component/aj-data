@@ -33,12 +33,14 @@ public interface BaseEntityConstants {
      */
     int STATUS_DRAFT = -1;
 
-
     /**
      * 下架/下线/隐藏
      */
     int STATUS_OFFLINE = 2;
 
+    /**
+     * ID 类型，可以是自增、雪花算法、UUID
+     */
     interface IdType {
         /**
          * 自增
